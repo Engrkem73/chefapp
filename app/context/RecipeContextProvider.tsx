@@ -1,8 +1,9 @@
-import { Recipe } from "./RecipeContext";
-import { useState } from 'react';
+import { Recipe, RecipeContext } from "./RecipeContext";
+import { useState,  PropsWithChildren  } from 'react';
 
-const RecipeProvider: React.FC = ({ children }) => {
-    const [recipe, setRecipe] = useState<Recipe>(null);
+
+const RecipeProvider: React.FC<PropsWithChildren> = ({ children }) => {
+    const [recipe, setRecipe] = useState<Recipe | null>(null);
   
     const updateRecipe = (newRecipe: Recipe) => {
       setRecipe(newRecipe);

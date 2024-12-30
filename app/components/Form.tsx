@@ -3,6 +3,7 @@ import React, { useState, FormEvent } from 'react'
 import RecipePrompt from './RecipePrompt'
 import EnterMore from './EnterMore'
 import DisplayRecipe from './DisplayRecipe'
+import { RecipeProvider } from '../context/RecipeContextProvider'
 interface Ingredients {
     value: string,
 }
@@ -65,12 +66,16 @@ const Form = () => {
                     ))}
                 </ul>
             </div> 
+            <RecipeProvider>
             <div className='pt-24'>
-                {ingredientsList.length > 3 ? <RecipePrompt ingredientsList={ingredientsList}/> : <EnterMore ingredientsLength={ingredientsLength}/>}
-            </div> 
-        </div>
-        <div>
-            <DisplayRecipe/>
+                {ingredientsList.length > 3 ? 
+                <RecipePrompt ingredientsList={ingredientsList}/>
+                : <EnterMore ingredientsLength={ingredientsLength}/>}
+            </div>
+             <div>
+                <DisplayRecipe/>
+            </div>
+            </RecipeProvider>
         </div>
     </main>
   )

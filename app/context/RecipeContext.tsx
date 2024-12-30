@@ -1,25 +1,16 @@
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 
 // Define the shape of the recipe state
 export interface Recipe {
-  recipe:  string | null | undefined;
+  recipe:  string | undefined;
 }
 
 // Define the context value type
-interface RecipeContextValue {
-  recipe: Recipe;
+export interface RecipeContextValue {
+  recipe: Recipe | null | undefined;
   updateRecipe: (newRecipe: Recipe) => void;
 }
 
 // Create the context
-const RecipeContext = createContext<RecipeContextValue | undefined>(undefined);
+export const RecipeContext = createContext<RecipeContextValue | undefined>(undefined);
 
-
-export const useRecipe = () => {
-    const context = useContext(RecipeContext);
-    if (!context) {
-      throw new Error('useRecipe must be used within a RecipeProvider');
-    }
-    return context;
-  };
-  

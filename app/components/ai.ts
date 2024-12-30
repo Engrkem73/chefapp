@@ -11,7 +11,7 @@ interface Ingredients {
     value: string,
 }
 
-const hf = new HfInference(process.env.HUGGINGFACE_API_KEY)
+const hf = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY)
 
 export async function generateRecipe(ingredients: Ingredients[]) {
     const ingredientsString = ingredients.map(ing => ing.value).join(", ")
