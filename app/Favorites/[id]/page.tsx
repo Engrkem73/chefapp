@@ -3,11 +3,11 @@ import ReactMarkdown from 'react-markdown';
 import { prisma } from '@/prisma';
 import Link from 'next/link';
 
-
 const page = async({ params }: { params: { id: string } }) => {
+    const id = (await params).id
     const response = await prisma.favorites.findUnique({
         where: {
-            id: await params.id
+            id: id
         }
     })
 
