@@ -2,7 +2,8 @@ import React from 'react'
 import { auth } from '@/auth'
 import { prisma } from "@/prisma";
 import SignIn from '../components/Sign-in'
-import Link from 'next/link';
+import FavoriteList from '../components/FavoriteList';
+
 
 
 const page = async () => {
@@ -22,27 +23,16 @@ const page = async () => {
         userId: session?.user?.id,
       }
     })
+  
     return (
-      <>
-        <ul>
-          {favorites.map((favorite) => (
-              <li key={favorite.id}>
-                <div className='bg-slate-300 border'>
-                  <Link href={`/Favorites/${favorite.id}`}>
-                    {favorite.title}
-                  </Link>
-                </div>
-              </li>
-          ))}
-        </ul>
-      </>
+      <FavoriteList favorites={favorites}/>
     )
   }
   return (
-    <main className='flex flex-col items-center justify-start min-h-screen pt-7 gap-4'>
+    <main className='flex flex-col items-center justify-start min-h-screen pt-7'>
       <CheckSession/>
     </main>
   )
 }
 
-export default page
+export default page;
