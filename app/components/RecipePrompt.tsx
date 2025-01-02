@@ -15,6 +15,7 @@ const RecipePrompt: React.FC<{ ingredientsList: Ingredients[]}> = ({ingredientsL
         try{
         setIsLoading(true)
         const generatedRecipe = await generateRecipe(value);
+        setIsLoading(false)
         if (!recipeContext) {
             console.log("No Recipe Context available")
             return ""
@@ -35,7 +36,7 @@ const RecipePrompt: React.FC<{ ingredientsList: Ingredients[]}> = ({ingredientsL
     
     
   return (
-    <section className=' text-white flex flex-row items-center justify-between p-5 h-auto bg-blue-600 rounded-2xl'>
+    <div className=' text-white flex flex-row items-center justify-between p-5 h-auto bg-blue-600 rounded-2xl min-w-[28rem] max-w-[28rem]'>
             <div className='flex flex-col justify-between gap-3 w-52'>
                 <h4 className='text-lg font-bold'>Ready for a recipe?</h4>
                 <p>Generate a recipe from your list of ingredients</p>
@@ -47,7 +48,7 @@ const RecipePrompt: React.FC<{ ingredientsList: Ingredients[]}> = ({ingredientsL
             >
                 {isLoading ? 'Generating recipe...' : 'Get a recipe'}
             </button>
-    </section>
+    </div>
   )
 }
 
