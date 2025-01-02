@@ -29,7 +29,7 @@ const page = async () => {
     )
   }
   return (
-    <main className='flex flex-col items-center justify-start min-h-screen pt-7'>
+    <main className='flex flex-col items-center justify-start pt-7'>
       <CheckSession/>
     </main>
   )
