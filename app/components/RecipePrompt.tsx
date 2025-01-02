@@ -27,7 +27,6 @@ const RecipePrompt: React.FC<{ ingredientsList: Ingredients[]}> = ({ingredientsL
         const cleanRecipe = generatedRecipe
         .replace(/\n{3,}/g, '\n\n')
         .trim();
-        console.log("clean",cleanRecipe)
         const { updateRecipe } = recipeContext
         updateRecipe({recipe:cleanRecipe})
     }catch {

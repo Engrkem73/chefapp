@@ -33,7 +33,7 @@ const Form = () => {
     const ingredientsLength: number = ingredientsList.length
 
   return (
-    <main className='flex flex-col justify-start items-center'>
+    <main className='flex flex-col justify-start items-center pt-5'>
         <div className='flex flex-col justify-start items-center'>
             <div className='min-w-9/12 max-w-9/12'>
                 <div>
@@ -75,7 +75,7 @@ const Form = () => {
                     <RecipePrompt ingredientsList={ingredientsList}/>
                     : <EnterMore ingredientsLength={ingredientsLength}/>}
                 </div>
-                <div className='pt-7 p-2 m-2'>
+                <div className='pt-7 p-2 m-2 sm:w-[1000px] w-screen'>
                     <DisplayRecipe/>
                 </div>
                 </RecipeProvider>

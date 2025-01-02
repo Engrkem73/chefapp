@@ -20,7 +20,11 @@ export async function generateRecipe(ingredients: Ingredients[]) {
             model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
             messages: [
                 { role: "system", content: SYSTEM_PROMPT },
-                { role: "user", content: `I have ${ingredientsString}. Please give me a recipe you'd recommend I make!` },
+                { role: "user", content: `I have ${ingredientsString}. 
+                    Please give me a recipe you'd recommend I make! 
+                    Please return a title for your recipe. 
+                    Make sure the title is the first most line.
+                    Format your response in markdown to make it easier to render to a web page` },
             ],
             max_tokens: 1024,
         })
