@@ -18,12 +18,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  title: {
-    template: '%s | Chef Mistral',
-    default: 'Chef Mistral - Your AI-Powered Recipe Assistant'
-  },
-  description: "Transform your ingredients into delicious recipes with Chef Mistral, your AI-powered cooking companion. Get personalized recipe suggestions based on what's in your kitchen.",
-  keywords: ['recipe', 'cooking', 'AI chef', 'meal planner', 'food', 'ingredients', 'cooking assistant'],
+  title: 'AI Recipe Generator - Demo Project',
+  description: 'An experimental AI-powered recipe generator using free models. Enter ingredients and get creative recipe suggestions. Note: Results are for demonstration purposes.',
+  keywords: ['AI', 'recipe generator', 'demo project', 'experimental', 'Next.js', 'React'],
   authors: [{ name: 'Chef Mistral Team' }],
   creator: 'Chef Mistral',
   icons: {
@@ -35,8 +32,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    title: 'Chef Mistral - Your AI-Powered Recipe Assistant',
-    description: "Transform your ingredients into delicious recipes with Chef Mistral, your AI-powered cooking companion.",
+    title: 'AI Recipe Generator - Demo Project',
+    description: 'An experimental AI-powered recipe generator using free models. Enter ingredients and get creative recipe suggestions.',
     siteName: 'Chef Mistral',
     images: [{
       url: '/chefhat.png',

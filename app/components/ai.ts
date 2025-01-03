@@ -7,80 +7,50 @@ if (!process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY) {
 
 const hf = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY)
 
-const SYSTEM_PROMPT = `Create a recipe using the provided ingredients.
-The recipe must follow this exact format:
+const SYSTEM_PROMPT = `
+You are an assistant that receives a list of ingredients that a user has and suggests 
+a recipe they could make with some or all of those ingredients. You don't need to use 
+every ingredient they mention in your recipe. The recipe can include additional 
+ingredients they didn't mention, but try not to include too many extra ingredients. 
+Format your response in markdown to make it easier to render to a web page.
+The expected output is like this.
+The title is a must
 
-Beef and Eggs Breakfast
+Garlic Fried Rice - title
 
 Ingredients:
-- 2 eggs
-- 200g beef, sliced
-- Salt and pepper
-- Oil for cooking
 
+2 cups cooked rice
+1 egg
+1/2 onion, diced
+2 cloves garlic, minced
+1 tbsp vegetable oil
+Salt and pepper, to taste
+2 green onions, sliced (optional)
 Instructions:
-1. Heat oil in pan
-2. Cook beef until done
-3. Add eggs and scramble
-4. Season and serve`
 
-function formatRecipe(text: string): string {
-    // Extract title (first line that's not empty and doesn't start with common prefixes)
-    const lines = text.split('\n').filter(line => line.trim() !== '')
-    const title = lines[0]
-    if (!title || /^(here|recipe|let me|i'll|a recipe)/i.test(title)) {
-        return "Recipe"
-    }
-
-    // Find ingredients section
-    const ingredientsStart = text.toLowerCase().indexOf('ingredients')
-    const instructionsStart = text.toLowerCase().indexOf('instructions')
-
-    // If sections aren't found, try to create them
-    if (ingredientsStart === -1 || instructionsStart === -1) {
-        const remainingLines = lines.slice(1).join('\n')
-        return `${title}\n\nIngredients:\n${remainingLines}\n\nInstructions:\n1. Combine ingredients\n2. Cook until done\n3. Serve and enjoy`
-    }
-
-    // Extract and clean up sections
-    const ingredients = text.slice(ingredientsStart, instructionsStart).trim()
-    const instructions = text.slice(instructionsStart).trim()
-
-    // Format the final recipe
-    return `${title}\n\n${ingredients}\n\n${instructions}`
-}
+Heat the vegetable oil in a large skillet over medium-high heat.
+Add the diced onion to the skillet and sauté until softened, about 5 minutes.
+Add the minced garlic to the skillet and cook for another minute, stirring constantly to prevent burning.
+Push the onions and garlic to one side of the skillet and crack the egg into the other side. Scramble the egg and cook until set.
+Add the cooked rice to the skillet and stir everything together. Season with salt and pepper to taste.
+Serve the fried rice garnished with sliced green onions, if desired.
+Enjoy your tasty garlic fried rice!`
 
 export async function generateRecipe(ingredients: Ingredients[]) {
     const ingredientsString = ingredients.map(ing => ing.value).join(", ")
-    
     try {
-        const response = await hf.textGeneration({
-            model: "tiiuae/falcon-7b-instruct",
-            inputs: `${SYSTEM_PROMPT}\n\nCreate a recipe using these ingredients: ${ingredientsString}`,
-            parameters: {
-                max_new_tokens: 500,
-                temperature: 0.7,
-                top_p: 0.95,
-                repetition_penalty: 1.15,
-                return_full_text: false,
-            },
+        const response = await hf.chatCompletion({
+            model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+            messages: [
+                { role: "system", content: SYSTEM_PROMPT },
+                { role: "user", content: `I have ${ingredientsString}. Please give me a recipe you'd recommend I make!` },
+            ],
+            max_tokens: 1024,
         })
-
-        if (!response.generated_text) {
-            throw new Error('No recipe generated')
-        }
-
-        // Clean up the response
-        const cleanedResponse = response.generated_text
-            .replace(/^[^A-Za-z]*/g, '')
-            .replace(/\n{3,}/g, '\n\n')
-            .trim()
-
-        // Format the recipe
-        return formatRecipe(cleanedResponse)
+        return response.choices[0].message.content
     } catch (error) {
         console.error('Error generating recipe:', error)
-        // Return a basic recipe format if generation fails
-        return `Simple ${ingredients[0]?.value || 'Ingredient'} Recipe\n\nIngredients:\n- ${ingredients.map(ing => ing.value).join('\n- ')}\n\nInstructions:\n1. Combine ingredients\n2. Cook until done\n3. Season to taste\n4. Serve and enjoy`
+        throw error
     }
 }
