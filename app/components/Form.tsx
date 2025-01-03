@@ -4,6 +4,7 @@ import RecipePrompt from './RecipePrompt'
 import EnterMore from './EnterMore'
 import DisplayRecipe from './DisplayRecipe'
 import { RecipeProvider } from '../context/RecipeContextProvider'
+
 interface Ingredients {
     value: string,
 }
@@ -33,6 +34,7 @@ const Form = () => {
     const ingredientsLength: number = ingredientsList.length
 
   return (
+
     <main className='flex flex-col justify-start items-center pt-5'>
         <div className='flex flex-col justify-start items-center'>
             <div className='min-w-9/12 max-w-9/12'>
@@ -81,8 +83,7 @@ const Form = () => {
                 </RecipeProvider>
             </div>
         </div>
-    </main>
-  )
+    </main>  )
 }
 
 export default Form

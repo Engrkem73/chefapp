@@ -13,11 +13,16 @@ interface Ingredients {
 
 const hf = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY)
 
+const models = {
+    primary: "HuggingFaceH4/zephyr-7b-beta",
+    fallback: "mistralai/Mixtral-8x7B-Instruct-v0.1" }
+
 export async function generateRecipe(ingredients: Ingredients[]) {
     const ingredientsString = ingredients.map(ing => ing.value).join(", ")
-    try {
-        const response = await hf.chatCompletion({
-            model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+    
+    async function tryModel(modelName: string) {
+        return await hf.chatCompletion({
+            model: modelName,
             messages: [
                 { role: "system", content: SYSTEM_PROMPT },
                 { role: "user", content: `I have ${ingredientsString}. 
@@ -28,9 +33,31 @@ export async function generateRecipe(ingredients: Ingredients[]) {
             ],
             max_tokens: 1024,
         })
+    }
+
+    try {
+        // Try primary model first
+        const response = await tryModel(models.primary)
         return response.choices[0].message.content
-    } catch (error) {
-        console.error('Error generating recipe:', error)
-        throw error
+    } catch (error: unknown) {
+        if(error instanceof Error) {
+            console.error('Primary model failed:', {
+                message: error.message
+            })
+        }
+        try {
+            // Try fallback model
+            const fallbackResponse = await tryModel(models.fallback)
+            return fallbackResponse.choices[0].message.content
+        } catch (fallbackError: unknown) {
+            if(fallbackError instanceof Error){
+                console.error('All models failed:', {
+                    message: fallbackError.message,
+                })
+            } else {
+                console.error('Unknown error:', fallbackError)
+            }
+            throw fallbackError
+        }
     }
 }

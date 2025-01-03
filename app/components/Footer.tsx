@@ -10,7 +10,7 @@ const Footer = () => {
                 Created by <span className="font-bold">Engrkem73</span>
             </p>
             <p>
-                Email: <span className="font-bold"><a href="mailto:kemueljohn73@gmail.com">kemueljohn73@gmail.com</a></span>
+                Email: <span className="font-bold"><a href="mailto:kjbb73@gmail.com">kjbb73@gmail.com</a></span>
             </p>
         </footer>
     );
