@@ -3,8 +3,16 @@ import { auth } from '@/auth'
 import { prisma } from "@/prisma";
 import SignIn from '../components/Sign-in'
 import FavoriteList from '../components/FavoriteList';
+import { Metadata } from 'next'
 
-
+export const metadata: Metadata = {
+  title: 'My Favorites',
+  description: 'View and manage your favorite recipes. Access your personalized collection of AI-generated recipes anytime.',
+  openGraph: {
+    title: 'My Favorite Recipes - Chef Mistral',
+    description: 'View and manage your favorite recipes. Access your personalized collection of AI-generated recipes anytime.',
+  },
+}
 
 const page = async () => {
   const session = await auth()

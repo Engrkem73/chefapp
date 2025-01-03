@@ -5,7 +5,6 @@ import { ApiRouteContext } from "../types";
 
 export async function POST(
   request: NextRequest,
-  context: ApiRouteContext
 ): Promise<NextResponse> {
   try {
     const session = await auth();
@@ -42,8 +41,6 @@ export async function POST(
 }
 
 export async function GET(
-  request: NextRequest,
-  context: ApiRouteContext
 ): Promise<NextResponse> {
   return NextResponse.json(null, { status: 405 });
 }

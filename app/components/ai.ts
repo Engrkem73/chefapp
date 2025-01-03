@@ -1,44 +1,63 @@
 import { HfInference } from '@huggingface/inference'
+import { Ingredients } from '@/types'
 
-const SYSTEM_PROMPT = `
-You are an assistant that receives a list of ingredients that a user has and suggests 
-a recipe they could make with some or all of those ingredients. You don't need to use 
-every ingredient they mention in your recipe. The recipe can include additional 
-ingredients they didn't mention, but try not to include too many extra ingredients. 
-Format your response in markdown to make it easier to render to a web page`
-
-interface Ingredients {
-    value: string,
+if (!process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY) {
+    throw new Error('Missing Hugging Face API Key')
 }
 
 const hf = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY)
 
 const models = {
-    primary: "HuggingFaceH4/zephyr-7b-beta",
-    fallback: "mistralai/Mixtral-8x7B-Instruct-v0.1" }
+    primary: "mistralai/Mixtral-8x7B-Instruct-v0.1",
+    fallback: "HuggingFaceH4/zephyr-7b-beta"
+}
 
 export async function generateRecipe(ingredients: Ingredients[]) {
     const ingredientsString = ingredients.map(ing => ing.value).join(", ")
     
-    async function tryModel(modelName: string) {
-        return await hf.chatCompletion({
-            model: modelName,
-            messages: [
-                { role: "system", content: SYSTEM_PROMPT },
-                { role: "user", content: `I have ${ingredientsString}. 
-                    Please give me a recipe you'd recommend I make! 
-                    Please return a title for your recipe. 
-                    Make sure the title is the first most line.
-                    Format your response in markdown to make it easier to render to a web page` },
-            ],
-            max_tokens: 1024,
+    const systemPrompt = `[SYSTEM] You will create a recipe using these ingredients: ${ingredientsString}. 
+Your response must follow this exact format, starting with the title on the first line:
+
+[EXAMPLE RESPONSE FORMAT]
+Asian-Style Beef Bowl
+
+Ingredients:
+- 500g beef
+- 2 cloves garlic
+- 1 tbsp soy sauce
+- Salt to taste
+
+Instructions:
+1. Slice beef thinly
+2. Heat oil in wok
+3. Cook beef until browned
+4. Season and serve
+
+[YOUR RESPONSE BEGINS BELOW THIS LINE]
+`
+
+    async function tryModel(model: string) {
+        return await hf.textGeneration({
+            model: model,
+            inputs: systemPrompt,
+            parameters: {
+                max_new_tokens: 1000,
+                temperature: 0.7,
+                top_p: 0.95,
+                repetition_penalty: 1.15,
+                stop: ["[", "\n\n\n"],
+            },
         })
     }
 
     try {
-        // Try primary model first
         const response = await tryModel(models.primary)
-        return response.choices[0].message.content
+        // Clean up any potential system message or extra text
+        const cleanedResponse = response.generated_text
+            .split('[YOUR RESPONSE BEGINS BELOW THIS LINE]')
+            .pop()
+            ?.trim() || ''
+        return cleanedResponse
     } catch (error: unknown) {
         if(error instanceof Error) {
             console.error('Primary model failed:', {
@@ -46,18 +65,19 @@ export async function generateRecipe(ingredients: Ingredients[]) {
             })
         }
         try {
-            // Try fallback model
             const fallbackResponse = await tryModel(models.fallback)
-            return fallbackResponse.choices[0].message.content
-        } catch (fallbackError: unknown) {
-            if(fallbackError instanceof Error){
-                console.error('All models failed:', {
-                    message: fallbackError.message,
+            const cleanedFallback = fallbackResponse.generated_text
+                .split('[YOUR RESPONSE BEGINS BELOW THIS LINE]')
+                .pop()
+                ?.trim() || ''
+            return cleanedFallback
+        } catch (error: unknown) {
+            if(error instanceof Error) {
+                console.error('Fallback model failed:', {
+                    message: error.message
                 })
-            } else {
-                console.error('Unknown error:', fallbackError)
             }
-            throw fallbackError
+            throw new Error('Failed to generate recipe')
         }
     }
 }

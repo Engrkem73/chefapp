@@ -1,4 +1,14 @@
 import React from 'react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About',
+  description: 'Learn more about Chef Mistral, your AI-powered cooking companion. Discover how we help you create delicious meals from your available ingredients.',
+  openGraph: {
+    title: 'About Chef Mistral - Your AI Kitchen Assistant',
+    description: 'Learn more about Chef Mistral, your AI-powered cooking companion. Discover how we help you create delicious meals from your available ingredients.',
+  },
+}
 
 const page = () => {
   return (
