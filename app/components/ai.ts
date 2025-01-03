@@ -7,7 +7,8 @@ if (!process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY) {
 
 const hf = new HfInference(process.env.NEXT_PUBLIC_HUGGINGFACE_API_KEY)
 
-const SYSTEM_PROMPT = `You are a helpful chef. Create recipes in this exact format:
+const SYSTEM_PROMPT = `Create a recipe using the provided ingredients.
+The recipe must follow this exact format:
 
 Beef and Eggs Breakfast
 
@@ -22,6 +23,32 @@ Instructions:
 2. Cook beef until done
 3. Add eggs and scramble
 4. Season and serve`
+
+function formatRecipe(text: string): string {
+    // Extract title (first line that's not empty and doesn't start with common prefixes)
+    const lines = text.split('\n').filter(line => line.trim() !== '')
+    const title = lines[0]
+    if (!title || /^(here|recipe|let me|i'll|a recipe)/i.test(title)) {
+        return "Recipe"
+    }
+
+    // Find ingredients section
+    const ingredientsStart = text.toLowerCase().indexOf('ingredients')
+    const instructionsStart = text.toLowerCase().indexOf('instructions')
+
+    // If sections aren't found, try to create them
+    if (ingredientsStart === -1 || instructionsStart === -1) {
+        const remainingLines = lines.slice(1).join('\n')
+        return `${title}\n\nIngredients:\n${remainingLines}\n\nInstructions:\n1. Combine ingredients\n2. Cook until done\n3. Serve and enjoy`
+    }
+
+    // Extract and clean up sections
+    const ingredients = text.slice(ingredientsStart, instructionsStart).trim()
+    const instructions = text.slice(instructionsStart).trim()
+
+    // Format the final recipe
+    return `${title}\n\n${ingredients}\n\n${instructions}`
+}
 
 export async function generateRecipe(ingredients: Ingredients[]) {
     const ingredientsString = ingredients.map(ing => ing.value).join(", ")
@@ -43,29 +70,17 @@ export async function generateRecipe(ingredients: Ingredients[]) {
             throw new Error('No recipe generated')
         }
 
+        // Clean up the response
         const cleanedResponse = response.generated_text
             .replace(/^[^A-Za-z]*/g, '')
             .replace(/\n{3,}/g, '\n\n')
-            .replace(/^(Here's |Recipe:|A recipe for |I'll create |Let me )[^]*?\n/, '')
             .trim()
 
-        // More lenient validation
-        if (!cleanedResponse.includes('Ingredients') || !cleanedResponse.includes('Instructions')) {
-            console.log('Validation failed. Response format incorrect.')
-            // Try to fix common format issues
-            const title = cleanedResponse.split('\n')[0]
-            const rest = cleanedResponse.split('\n').slice(1).join('\n')
-            
-            // If we at least have a title and some content, try to format it
-            if (title && rest) {
-                return `${title}\n\nIngredients:\n${rest}`
-            }
-            throw new Error('Recipe format could not be corrected')
-        }
-
-        return cleanedResponse
+        // Format the recipe
+        return formatRecipe(cleanedResponse)
     } catch (error) {
         console.error('Error generating recipe:', error)
-        throw error
+        // Return a basic recipe format if generation fails
+        return `Simple ${ingredients[0]?.value || 'Ingredient'} Recipe\n\nIngredients:\n- ${ingredients.map(ing => ing.value).join('\n- ')}\n\nInstructions:\n1. Combine ingredients\n2. Cook until done\n3. Season to taste\n4. Serve and enjoy`
     }
 }
